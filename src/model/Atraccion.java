@@ -1,9 +1,6 @@
 package model;
 
-/**
- * Clase que representa una atraccion del parque MagicWorld.
- */
-public class Atraccion {
+public abstract class Atraccion {
 
     protected String nombre;
     protected String zonaUbicacion;
@@ -12,9 +9,6 @@ public class Atraccion {
     protected int visitantesPorDia;
     protected double precioEntrada;
 
-    /**
-     * Constructor de la clase Atraccion
-     */
     public Atraccion(String nombre, String zonaUbicacion, int capacidadMaxima,
                      int edadMinimaAnios, int visitantesPorDia, double precioEntrada) {
         this.nombre = nombre;
@@ -25,28 +19,38 @@ public class Atraccion {
         this.precioEntrada = precioEntrada;
     }
 
-     /**
-     * Retorna una representacion en texto de la información de la atracción
-     */
+    public abstract double calcularIngresoDiario();
+
+    public abstract boolean requiereMantenimiento();
+
+    public boolean superaCapacidad() {
+        return visitantesPorDia > capacidadMaxima;
+    }
+
+    public String alertaCapacidad() {
+        if (superaCapacidad()) {
+            int exceso = visitantesPorDia - capacidadMaxima;
+            double porcentaje = ((double) exceso / capacidadMaxima) * 100;
+            return "ALERTA [" + nombre + "]: " + exceso + " visitantes excedieron el limite. "
+                    + String.format("%.1f", porcentaje) + "% de sobreocupacion.";
+        }
+        return "";
+    }
+
     @Override
     public String toString() {
         return "--------------------------------------------" +
                 "\nNombre        : " + nombre +
                 "\nZona          : " + zonaUbicacion +
                 "\nCapacidad max : " + capacidadMaxima + " personas" +
-                "\nEdad minima   : " + edadMinimaAnios + " años" +
+                "\nEdad minima   : " + edadMinimaAnios + " anios" +
                 "\nVisitantes hoy: " + visitantesPorDia +
                 "\nPrecio entrada: $" + String.format("%,.2f", precioEntrada) +
-                "\nIngreso diario: $" + String.format("%,.2f", calcularIngresoDiario());
+                "\nIngreso diario: $" + String.format("%,.2f", calcularIngresoDiario()) +
+                "\nMantenimiento : " + (requiereMantenimiento() ? "Si" : "No");
     }
 
-    public double calcularIngresoDiario(){
-        return 0;
-        //Completar para cumplir con el requerimiento
-    }
-
-    // Getters
-    public void setVisitantesPorDia(int visitantes){visitantesPorDia = visitantes;}
+    public void setVisitantesPorDia(int visitantes) { visitantesPorDia = visitantes; }
     public String getNombre() { return nombre; }
     public String getZonaUbicacion() { return zonaUbicacion; }
     public int getCapacidadMaxima() { return capacidadMaxima; }

@@ -2,109 +2,103 @@ package model;
 
 import java.util.ArrayList;
 
-/**
- * Clase controladora del sistema MagicWorld.
- * Administra la lista de atracciones y centraliza las operaciones
- * que la interfaz de usuario necesita realizar.
- */
 public class Parque {
 
     private String nombre;
     private ArrayList<Atraccion> atracciones;
 
-    /**
-     * Constructor del Parque. Inicializa el ArrayList de atracciones.
-     */
     public Parque(String nombre) {
         this.nombre = nombre;
         this.atracciones = new ArrayList<>();
     }
 
-    /**
-     * Retorna la lista completa de atracciones registradas.
-     */
     public ArrayList<Atraccion> getAtracciones() {
         return atracciones;
     }
 
-    /*
-     * Los visitantes se inicializan en 0 y luego pueden registrarse
-     * mediante el metodo registrarVisitantes.
-     */
-    public void agregarAtraccion(String nombre, String zonaUbicacion, int capacidadMaxima,
-                                 int edadMinimaAnios, double precioEntrada) {
-
-        Atraccion atraccion = new Atraccion(
-                nombre,
-                zonaUbicacion,
-                capacidadMaxima,
-                edadMinimaAnios,
-                0,
-                precioEntrada);
-
-         atracciones.add(atraccion);
+    public void agregarSimulador(String nombre, String zona, int capacidad, int edadMin,
+                                 double precio, int estaciones, boolean anteojos) {
+        atracciones.add(new SimuladorRealidadVirtual(nombre, zona, capacidad, edadMin, 0, precio, estaciones, anteojos));
     }
 
-     /**
-     * Busca una atraccion por nombre y registra sus visitantes del dia.
-     * @param nombreAtraccion nombre de la atraccion
-     * @param visitantesPorDia cantidad de visitantes del dia
-     */
-    public void registrarVisitantes(String nombreAtraccion, int visitantesPorDia) {
-        Atraccion atraccionEncontrada = buscarAtraccionPorNombre(nombreAtraccion);
-
-        if (atraccionEncontrada == null) {
-            System.out.println("No se encontro una atraccion con el nombre: " + nombreAtraccion);
-        } else {
-            atraccionEncontrada.setVisitantesPorDia(visitantesPorDia);
-        }
+    public void agregarJuegoInfantil(String nombre, String zona, int capacidad, int edadMin,
+                                     double precio, int edadMax, boolean supervision) {
+        atracciones.add(new JuegoInfantil(nombre, zona, capacidad, edadMin, 0, precio, edadMax, supervision));
     }
 
-    /**
-     * Busca una atraccion por su nombre.
-     * 
-     * @param nombreAtraccion nombre de la atraccion buscada
-     * @return la atraccion encontrada o null si no existe
-     */
+    public void agregarEspectaculo(String nombre, String zona, int capacidad, int edadMin,
+                                   double precio, int duracion, boolean materialPeligroso) {
+        atracciones.add(new EspectaculoPirotecnico(nombre, zona, capacidad, edadMin, 0, precio, duracion, materialPeligroso));
+    }
+
     public Atraccion buscarAtraccionPorNombre(String nombreAtraccion) {
-        for (Atraccion atraccion : atracciones) {
-            if (atraccion.getNombre().equalsIgnoreCase(nombreAtraccion)) {
-                return atraccion;
-            }
+        for (Atraccion a : atracciones) {
+            if (a.getNombre().equalsIgnoreCase(nombreAtraccion)) return a;
         }
-
         return null;
     }
 
-    // ---------------------------------------------------------------
-    // CALCULOS Y REPORTES
-    // ---------------------------------------------------------------
-
-    /**
-     *
-     */
-    public double calcularIngresoTotalDiario() {
-        //Completar para cumplir con el requerimiento
-        return 0;
+    public void registrarVisitantes(String nombreAtraccion, int visitantesPorDia) {
+        Atraccion encontrada = buscarAtraccionPorNombre(nombreAtraccion);
+        if (encontrada == null) {
+            System.out.println("No se encontro una atraccion con el nombre: " + nombreAtraccion);
+        } else {
+            encontrada.setVisitantesPorDia(visitantesPorDia);
+            System.out.println("Visitantes registrados para: " + nombreAtraccion);
+        }
     }
 
-    /**
-     *
-     */
     public void mostrarIngresosDiarios() {
-        //Completar para cumplir con el requerimiento
+        System.out.println("\n--- INGRESOS DIARIOS ---");
+        double total = 0;
+        for (Atraccion a : atracciones) {
+            double ingreso = a.calcularIngresoDiario();
+            System.out.printf("  %-25s $%,.2f%n", a.getNombre() + ":", ingreso);
+            total += ingreso;
+        }
+        System.out.println("  ----------------------------------------");
+        System.out.printf("  %-25s $%,.2f%n", "TOTAL:", total);
     }
 
-    /**
-     */
+    public double calcularIngresoTotalDiario() {
+        double total = 0;
+        for (Atraccion a : atracciones) total += a.calcularIngresoDiario();
+        return total;
+    }
+
     public void generarReporteOperaciones() {
-        //Completar para cumplir con el requerimiento
+        System.out.println("\n--- REPORTE DE OPERACIONES ---");
+        if (atracciones.isEmpty()) {
+            System.out.println("No hay atracciones registradas.");
+            return;
+        }
+        for (Atraccion a : atracciones) {
+            System.out.println(a.toString());
+        }
     }
 
-    public void mostrarAtraccionesClasifRiesgo(){
-        //Completar para cumplir con el requerimiento
+    public void mostrarAtraccionesClasifRiesgo() {
+        System.out.println("\n--- ATRACCIONES CON NIVEL DE RIESGO ---");
+        boolean hayAlguna = false;
+        for (Atraccion a : atracciones) {
+            if (a instanceof INivelRiesgo) {
+                INivelRiesgo conRiesgo = (INivelRiesgo) a;
+                System.out.println("  " + a.getNombre() + " -> Riesgo: " + conRiesgo.nivelRiesgo());
+                hayAlguna = true;
+            }
+        }
+        if (!hayAlguna) System.out.println("  Ninguna atraccion tiene clasificacion de riesgo.");
     }
-    public void generarReporteAlertasCapacidad(){
-        //Completar para cumplir con el requerimiento
+
+    public void generarReporteAlertasCapacidad() {
+        System.out.println("\n--- ALERTAS DE CAPACIDAD ---");
+        boolean hayAlerta = false;
+        for (Atraccion a : atracciones) {
+            if (a.superaCapacidad()) {
+                System.out.println("  " + a.alertaCapacidad());
+                hayAlerta = true;
+            }
+        }
+        if (!hayAlerta) System.out.println("  Ninguna atraccion supera su capacidad maxima.");
     }
 }
